@@ -1,0 +1,81 @@
+body {
+    background-color: #121212;
+    color: white;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #1f1f1f;
+    position: fixed;
+    top: 0;
+    right: -250px;
+    height: 100%;
+    transition: right 0.3s ease;
+    padding: 20px;
+    z-index: 1100;
+}
+
+.sidebar.show {
+    right: 0;
+}
+
+.card {
+    background-color: #1e1e1e;
+    color: white;
+    border: none;
+    z-index: 1;
+}
+
+button.btn {
+    top: 20px;
+    right: 20px;
+    z-index: 1200;
+}
+
+textarea, input[type="text"] {
+    background-color: #2b2b2b !important;
+    color: white !important;
+    outline: none !important;
+    border: none !important;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 1.25rem;
+}
+
+textarea::placeholder, input[type="text"]::placeholder {
+    color: #999 !important;
+    opacity: 1;
+}
+
+textarea:focus, input:focus {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none;
+    background-color: #2b2b2b;
+    color: white !important;
+}
+
+.add-note {
+    cursor: pointer;
+    /* border: 2px dashed white; */
+    background-color: #1e1e1e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 75px;
+    height: 75px;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.add-note:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ul {
+    list-style-type: none;
+    justify-content: left;
+    padding: 0;
+    margin: 0;
+    gap: 10px;
+}

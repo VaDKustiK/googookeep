@@ -4,20 +4,97 @@ import (
 	"fmt"
 	"googookeep/db"
 	"googookeep/models"
+	"html/template"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
+var templates *template.Template
+
+func init() {
+	templates = template.Must(template.ParseFiles(
+		"templates/index.html",
+		"templates/note.html",
+	))
+}
+
 func main() {
 	db.ConnectDB()
 	defer db.DB.Close()
 
 	router := gin.Default()
+	router.Static("/static", "./static")
 
-	// Create a new note
-	router.POST("/notes", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
+		notes, err := models.GetAllNotes(db.DB)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error loading notes")
+			return
+		}
+
+		c.Header("Content-Type", "text/html")
+		err = templates.ExecuteTemplate(c.Writer, "index.html", gin.H{
+			"Title": "Your notes",
+			"Notes": notes,
+		})
+		if err != nil {
+			fmt.Println("TEMPLATE ERROR:", err)
+			c.String(http.StatusInternalServerError, "Template rendering error")
+		}
+	})
+
+	router.GET("/note/:id", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.String(http.StatusBadRequest, "Invalid note ID")
+			return
+		}
+
+		note, err := models.GetNoteByID(db.DB, id)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error loading note")
+			return
+		}
+
+		c.Header("Content-Type", "text/html")
+		err = templates.ExecuteTemplate(c.Writer, "note.html", gin.H{
+			"Title":  note.Title,
+			"Note":   note,
+			"IsEdit": true,
+		})
+		if err != nil {
+			fmt.Println("TEMPLATE ERROR:", err)
+			c.String(http.StatusInternalServerError, "Template rendering error")
+		}
+	})
+
+	router.POST("/notes/:id", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid note ID"})
+			return
+		}
+
+		title := c.PostForm("title")
+		content := c.PostForm("content")
+
+		if title == "" || content == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Title and content cannot be empty"})
+			return
+		}
+
+		err = models.UpdateNoteByID(db.DB, id, title, content)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating note"})
+			return
+		}
+
+		c.Redirect(http.StatusSeeOther, "/")
+	})
+
+	router.POST("/api/notes", func(c *gin.Context) {
 		var newNote models.Note
 		if err := c.ShouldBindJSON(&newNote); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
@@ -32,8 +109,7 @@ func main() {
 		c.JSON(http.StatusCreated, gin.H{"id": noteID, "message": "Note created"})
 	})
 
-	// Get all notes
-	router.GET("/notes", func(c *gin.Context) {
+	router.GET("/api/notes", func(c *gin.Context) {
 		notes, err := models.GetAllNotes(db.DB)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting notes"})
@@ -42,46 +118,7 @@ func main() {
 		c.JSON(http.StatusOK, notes)
 	})
 
-	// Get a note by ID
-	router.GET("/notes/:id", func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid note ID"})
-			return
-		}
-
-		note, err := models.GetNoteByID(db.DB, id)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error getting note"})
-			return
-		}
-		if note.ID == 0 {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Note not found"})
-			return
-		}
-
-		c.JSON(http.StatusOK, note)
-	})
-
-	// Delete a note by ID
-	router.DELETE("/notes/:id", func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid note ID"})
-			return
-		}
-
-		err = models.DeleteNoteByID(db.DB, id)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete note"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "Note deleted"})
-	})
-
-	// Update a note by ID
-	router.PUT("/notes/:id", func(c *gin.Context) {
+	router.PUT("/api/notes/:id", func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid note ID"})
@@ -96,11 +133,27 @@ func main() {
 
 		err = models.UpdateNoteByID(db.DB, id, updatedNote.Title, updatedNote.Content)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update note"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating note"})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "Note updated"})
+	})
+
+	router.DELETE("/api/notes/:id", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid note ID"})
+			return
+		}
+
+		err = models.DeleteNoteByID(db.DB, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting note"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Note deleted"})
 	})
 
 	fmt.Println("Server running on :8080")

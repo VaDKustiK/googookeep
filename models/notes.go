@@ -57,7 +57,6 @@ func GetNoteByID(db *sql.DB, id int) (Note, error) {
 	return note, nil
 }
 
-// delete a note by ID
 func DeleteNoteByID(db *sql.DB, id int) error {
 	query := "DELETE FROM notes WHERE id = $1"
 	_, err := db.Exec(query, id)
@@ -68,7 +67,6 @@ func DeleteNoteByID(db *sql.DB, id int) error {
 	return nil
 }
 
-// edit a note by ID
 func UpdateNoteByID(db *sql.DB, id int, title, content string) error {
 	query := "UPDATE notes SET title = $1, content = $2 WHERE id = $3"
 	_, err := db.Exec(query, title, content, id)
