@@ -33,19 +33,19 @@
       <div class="row">
         {{ range .Notes }}
         <div class="col-md-4 mb-4">
-          <div class="card bg-dark border-light text-light">
-            <div class="card-body">
-              <h5 class="card-title">{{ .Title }}</h5>
-              <p class="card-text">{{ .Content }}</p>
-              <a href="/note/{{ .ID }}" class="btn btn-outline-light">Edit</a>
+          <a href="/note/{{ .ID }}" class="text-decoration-none text-white">
+            <div class="card bg-dark border-light text-light note-card">
+              <div class="card-body">
+                <h5 class="card-title">{{ .Title }}</h5>
+                <p class="card-text">{{ .Content }}</p>
+              </div>
             </div>
-          </div>
+          </a>
         </div>
         {{ else }}
         <p>No notes yet.</p>
         {{ end }}
       </div>
-    </div>
 
     <script>
         function toggleSidebar() {

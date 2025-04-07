@@ -56,8 +56,8 @@ textarea:focus, input:focus {
 }
 
 .add-note {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
-    /* border: 2px dashed white; */
     background-color: #1e1e1e;
     display: inline-flex;
     align-items: center;
@@ -70,6 +70,8 @@ textarea:focus, input:focus {
 
 .add-note:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
 .ul {
@@ -78,4 +80,15 @@ textarea:focus, input:focus {
     padding: 0;
     margin: 0;
     gap: 10px;
+}
+
+.note-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  
+.note-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
