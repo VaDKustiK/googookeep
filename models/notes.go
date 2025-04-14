@@ -6,39 +6,49 @@ import (
 )
 
 type Note struct {
-	ID      int    `json:"id"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
-	Date    string `json:"date"`
+	ID       int    `json:"id"`
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Date     string `json:"date"`
+	Position int    `json:"position"`
 }
 
 func CreateNote(db *sql.DB, title, content string) (int, error) {
 	var id int
-	query := `INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING id`
-	err := db.QueryRow(query, title, content).Scan(&id)
+	var maxPosition int
+	err := db.QueryRow("SELECT COALESCE(MAX(position), 0) FROM notes").Scan(&maxPosition)
+	if err != nil {
+		log.Println("Error getting max position:", err)
+		return 0, err
+	}
+
+	query := `INSERT INTO notes (title, content, position) VALUES ($1, $2, $3) RETURNING id`
+	err = db.QueryRow(query, title, content, maxPosition+1).Scan(&id)
 	if err != nil {
 		log.Println("Error inserting note:", err)
 		return 0, err
 	}
+
 	return id, nil
 }
 
 func GetAllNotes(db *sql.DB) ([]Note, error) {
-	rows, err := db.Query("SELECT id, title, content, date FROM notes")
+	rows, err := db.Query("SELECT id, title, content, position FROM notes ORDER BY position ASC")
 	if err != nil {
-		log.Println("Error getting notes:", err)
+		log.Println("Error querying notes:", err)
 		return nil, err
 	}
 	defer rows.Close()
 
 	var notes []Note
 	for rows.Next() {
-		var note Note
-		if err := rows.Scan(&note.ID, &note.Title, &note.Content, &note.Date); err != nil {
+		var n Note
+		err := rows.Scan(&n.ID, &n.Title, &n.Content, &n.Position)
+		if err != nil {
 			log.Println("Error scanning notes:", err)
 			return nil, err
 		}
-		notes = append(notes, note)
+		notes = append(notes, n)
 	}
 	return notes, nil
 }
@@ -75,4 +85,12 @@ func UpdateNoteByID(db *sql.DB, id int, title, content string) error {
 		return err
 	}
 	return nil
+}
+
+func UpdateNotePosition(db *sql.DB, id, position int) error {
+	_, err := db.Exec("UPDATE notes SET position = $1 WHERE id = $2", position, id)
+	if err != nil {
+		log.Println("Error updating note position:", err)
+	}
+	return err
 }

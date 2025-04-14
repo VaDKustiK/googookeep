@@ -92,3 +92,13 @@ textarea:focus, input:focus {
     transform: scale(1.03);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
+
+.note-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.note-wrapper {
+    cursor: grab;
+}

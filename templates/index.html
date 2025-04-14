@@ -30,11 +30,11 @@
         </div>
       </div>
 
-      <div class="row">
+      <div id="noteGrid" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
         {{ range .Notes }}
-        <div class="col-md-4 mb-4">
+        <div class="col note-wrapper" data-id="{{ .ID }}">
           <a href="/note/{{ .ID }}" class="text-decoration-none text-white">
-            <div class="card bg-dark border-light text-light note-card">
+            <div class="card bg-dark border-light text-light note-card h-100">
               <div class="card-body">
                 <h5 class="card-title">{{ .Title }}</h5>
                 <p class="card-text">{{ .Content }}</p>
@@ -42,12 +42,30 @@
             </div>
           </a>
         </div>
-        {{ else }}
-        <p>No notes yet.</p>
         {{ end }}
-      </div>
-
+      </div>      
+    
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
+
+        const grid = document.getElementById("noteGrid");
+
+        new Sortable(grid, {
+            animation: 150,
+            onEnd: function (evt) {
+                const newOrder = Array.from(grid.children).map((el, index) => ({
+                    id: parseInt(el.dataset.id),
+                    order: index
+                }));
+
+                fetch("/api/notes/order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newOrder)
+                });
+            }
+        });
+
         function toggleSidebar() {
             document.getElementById("sidebar").classList.toggle("show");
         }

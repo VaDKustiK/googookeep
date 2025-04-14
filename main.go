@@ -156,6 +156,28 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Note deleted"})
 	})
 
+	router.POST("/api/notes/order", func(c *gin.Context) {
+		var newOrder []struct {
+			ID    int `json:"id"`
+			Order int `json:"order"`
+		}
+
+		if err := c.ShouldBindJSON(&newOrder); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+			return
+		}
+
+		for _, item := range newOrder {
+			_, err := db.DB.Exec("UPDATE notes SET position = $1 WHERE id = $2", item.Order, item.ID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update order"})
+				return
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Order updated"})
+	})
+
 	fmt.Println("Server running on :8080")
 	router.Run(":8080")
 }
