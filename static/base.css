@@ -64,7 +64,7 @@ textarea:focus, input:focus {
     justify-content: center;
     width: 75px;
     height: 75px;
-    margin-right: 10px;
+    margin-right: 20px;
     transition: background-color 0.3s ease;
 }
 
@@ -86,7 +86,7 @@ textarea:focus, input:focus {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     position: relative;
-  }
+}
   
 .note-card:hover {
     transform: scale(1.03);
