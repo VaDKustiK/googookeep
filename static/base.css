@@ -55,7 +55,7 @@ textarea:focus, input:focus {
     color: white !important;
 }
 
-.add-note {
+/* .add-note-btn {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     background-color: #1e1e1e;
@@ -68,10 +68,31 @@ textarea:focus, input:focus {
     transition: background-color 0.3s ease;
 }
 
-.add-note:hover {
+.add-note-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
     transform: scale(1.03);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+} */
+
+.add-note-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1e1e1e;
+    color: white;
+    border: none;
+    border-radius: .25rem;
+    width: 75px;
+    height: 75px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    padding: 0;
+}
+  
+.add-note-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(255,255,255,0.1);
 }
 
 .ul {
