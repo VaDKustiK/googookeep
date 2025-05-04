@@ -1,12 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"googookeep/db"
 	"googookeep/models"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -178,6 +181,56 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Order updated"})
 	})
 
+	// Import by share_code: duplicate the shared note into your own list
+	router.POST("/api/notes/import", func(c *gin.Context) {
+		var payload struct {
+			Code string `json:"code"`
+		}
+		if err := c.ShouldBindJSON(&payload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
+			return
+		}
+
+		shared, err := models.GetNoteByShareCode(db.DB, payload.Code)
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+			return
+		} else if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "lookup failed"})
+			return
+		}
+
+		newID, err := models.CreateNote(db.DB, shared.Title, shared.Content)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not import"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"id": newID})
+	})
+
+	// Return (and generate if missing) the share_code for a given note
+	router.POST("/api/notes/share/:id", func(c *gin.Context) {
+		id, _ := strconv.Atoi(c.Param("id"))
+
+		note, err := models.GetNoteByID(db.DB, id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "lookup failed"})
+			return
+		}
+
+		if note.ShareCode == "" {
+			code := fmt.Sprintf("%08d", rand.Intn(100_000_000))
+			if _, err := db.DB.Exec("UPDATE notes SET share_code=$1 WHERE id=$2", code, id); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save code"})
+				return
+			}
+			note.ShareCode = code
+		}
+
+		c.JSON(http.StatusOK, gin.H{"code": note.ShareCode})
+	})
+
+	rand.Seed(time.Now().UnixNano())
 	fmt.Println("Server running on :8080")
 	router.Run(":8080")
 }
