@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"googookeep/db"
 	"googookeep/models"
+	"googookeep/utils"
 	"html/template"
-	"math/rand"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -181,7 +180,6 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Order updated"})
 	})
 
-	// Import by share_code: duplicate the shared note into your own list
 	router.POST("/api/notes/import", func(c *gin.Context) {
 		var payload struct {
 			Code string `json:"code"`
@@ -208,7 +206,6 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"id": newID})
 	})
 
-	// Return (and generate if missing) the share_code for a given note
 	router.POST("/api/notes/share/:id", func(c *gin.Context) {
 		id, _ := strconv.Atoi(c.Param("id"))
 
@@ -219,7 +216,7 @@ func main() {
 		}
 
 		if note.ShareCode == "" {
-			code := fmt.Sprintf("%08d", rand.Intn(100_000_000))
+			code := utils.GenerateShareCode(8)
 			if _, err := db.DB.Exec("UPDATE notes SET share_code=$1 WHERE id=$2", code, id); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save code"})
 				return
@@ -230,7 +227,6 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"code": note.ShareCode})
 	})
 
-	rand.Seed(time.Now().UnixNano())
 	fmt.Println("Server running on :8080")
 	router.Run(":8080")
 }
