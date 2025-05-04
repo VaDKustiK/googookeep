@@ -123,3 +123,40 @@ textarea:focus, input:focus {
 .note-wrapper {
     cursor: grab;
 }
+
+#importModal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: none;
+}
+
+#importModal.show {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+}
+
+#importModal .card {
+    background: #1f1f1f;
+    color: white;
+    border: none;
+    width: 320px;
+    padding: 1rem;
+    border-radius: .5rem;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    animation: popIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0 } to { opacity: 1 }
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0 }
+    to   { transform: scale(1);   opacity: 1 }
+}
