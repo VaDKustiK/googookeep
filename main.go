@@ -188,31 +188,25 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
 			return
 		}
-
-		// 1) Print out exactly what code string arrived (trim whitespace just in case):
 		code := strings.TrimSpace(payload.Code)
-		fmt.Println("→ Import request received, code =", code)
-
-		// 2) Attempt lookup and log any SQL error:
+		fmt.Println("> Import request received, code =", code)
 		shared, err := models.GetNoteByShareCode(db.DB, code)
 		if err == sql.ErrNoRows {
-			fmt.Println("→ No row found for share_code =", code)
+			fmt.Println("> No row found for share_code =", code)
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		} else if err != nil {
-			fmt.Println("→ SQL error while looking up share_code:", err)
+			fmt.Println("> SQL error while looking up share_code:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "lookup failed"})
 			return
 		}
-
-		// 3) If found, duplicate it:
 		newID, err := models.CreateNote(db.DB, shared.Title, shared.Content)
 		if err != nil {
-			fmt.Println("→ Error duplicating shared note:", err)
+			fmt.Println("> Error duplicating shared note:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not import"})
 			return
 		}
-		fmt.Println("→ Import succeeded; new note ID =", newID)
+		fmt.Println("> Import succeeded; new note ID =", newID)
 		c.JSON(http.StatusOK, gin.H{"id": newID})
 	})
 
@@ -226,7 +220,6 @@ func main() {
 		}
 
 		if note.ShareCode == "" {
-			// Defensive fallback (should never happen)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "share code not available"})
 			return
 		}

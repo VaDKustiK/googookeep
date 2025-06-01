@@ -23,7 +23,9 @@
     <ul class="nav flex-column">
       <li class="nav-item"><a href="/" class="nav-link text-white">Notes</a></li>
       <li class="nav-item"><a href="/account" class="nav-link text-white">Account</a></li>
-      <li class="nav-item"><a href="/settings" class="nav-link text-white">Settings</a></li>
+      <li class="nav-item">
+        <a href="https://github.com/VaDKustiK/googookeep/blob/main/README.md" class="nav-link text-white">Help</a>
+      </li>
     </ul>
   </div>
 
@@ -56,7 +58,7 @@
         <!-- action buttons -->
         <div class="d-flex justify-content-end">
           <ul class="list-unstyled d-flex gap-2 mb-0">
-            <!-- Share button -->
+            <!-- share button -->
             <li>
               <button
                 type="button"
@@ -70,7 +72,9 @@
                   fill="currentColor"
                   class="bi bi-share-fill"
                   viewBox="0 0 16 16">
-                  <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
+                  <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 
+                           0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 
+                           1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
                 </svg>
               </button>
             </li>
@@ -95,53 +99,34 @@
     </div>
   </div>
 
-  <script>
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("show");
-    }
+  <!-- share code -->
+  <div
+    class="modal fade"
+    id="shareModal"
+    tabindex="-1"
+    aria-labelledby="shareModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="shareModalLabel">Share Code</h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body text-center">
+          <p id="shareCodeText" class="fs-4 mb-2"></p>
+          <small class="text-muted">Copied to clipboard</small>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    function deleteNote(button) {
-      const noteId = button.getAttribute("data-note-id");
-      if (!confirm("Are you sure you want to delete this note?")) return;
-      fetch(`/api/notes/${noteId}`, { method: "DELETE" })
-        .then(res => res.json())
-        .then(data => {
-          if (data.message === "Note deleted") {
-            window.location.href = "/";
-          } else {
-            alert("Failed to delete the note.");
-          }
-        })
-        .catch(err => console.error("Error:", err));
-    }
-
-    function shareNote(button) {
-    const noteId = button.getAttribute("data-note-id");
-
-    fetch(`/api/notes/share/${noteId}`, {
-      method: "POST",
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.code) {
-          navigator.clipboard.writeText(data.code)
-            .then(() => {
-              alert(`Share code for note ${noteId}: ${data.code}`);
-            })
-            .catch(() => {
-              alert(`Share code: ${data.code} (failed to copy)`);
-            });
-        } else if (data.error) {
-          alert("Error: " + data.error);
-        } else {
-          alert("Unexpected response from server.");
-        }
-      })
-      .catch(err => {
-        console.error("Error:", err);
-        alert("Failed to fetch share code.");
-      });
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/note.js"></script>
 </body>
 </html>

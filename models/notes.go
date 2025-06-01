@@ -23,8 +23,6 @@ func CreateNote(db *sql.DB, title, content string) (int, error) {
 		log.Println("Error getting max position:", err)
 		return 0, err
 	}
-
-	// Generate the share code once here
 	shareCode := utils.GenerateShareCode(8)
 
 	query := `

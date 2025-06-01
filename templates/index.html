@@ -24,10 +24,7 @@
       <li class="nav-item"><a href="/" class="nav-link text-white">Notes</a></li>
       <li class="nav-item"><a href="/account" class="nav-link text-white">Account</a></li>
       <li class="nav-item">
-        <a
-          href="https://github.com/VaDKustiK/googookeep/blob/main/README.md"
-          class="nav-link text-white"
-        >Help</a>
+        <a href="https://github.com/VaDKustiK/googookeep/blob/main/README.md" class="nav-link text-white">Help</a>
       </li>
     </ul>
   </div>
@@ -37,7 +34,7 @@
 
     <!-- action buttons -->
     <div class="row g-4 mb-4">
-      <!-- Add Note -->
+      <!-- add note -->
       <div class="col-auto">
         <button
           type="button"
@@ -55,7 +52,7 @@
         </button>
       </div>
 
-      <!-- Import Note -->
+      <!-- import note -->
       <div class="col-auto">
         <button
           type="button"
@@ -98,7 +95,7 @@
     </div>
   </div>
 
-  <!-- Bootstrap Import Modal -->
+  <!-- import modal -->
   <div
     class="modal fade"
     id="importModal"
@@ -134,66 +131,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Sidebar toggle
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("show");
-    }
-
-    // Create new note
-    function createNote() {
-      fetch("/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: "New Note", content: "" })
-      })
-      .then(r => r.json())
-      .then(d => { if (d.id) window.location.href = "/note/" + d.id });
-    }
-
-    // Import handler
-    document.getElementById("doImportBtn").addEventListener("click", () => {
-      const code = document.getElementById("importCode").value.trim();
-      if (!/^\d{8}$/.test(code)) {
-        return alert("Please enter a valid 8-digit code.");
-      }
-      fetch("/api/notes/import", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code })
-      })
-      .then(r => r.json())
-      .then(d => {
-        if (d.id) {
-          // hide modal
-          const m = bootstrap.Modal.getInstance(document.getElementById("importModal"));
-          m.hide();
-          location.reload();
-        } else {
-          alert("Import failed");
-        }
-      })
-      .catch(() => alert("Error importing"));
-    });
-
-    const grid = document.getElementById("noteGrid");
-
-        new Sortable(grid, {
-            animation: 150,
-            onEnd: function (evt) {
-                const newOrder = Array.from(grid.children).map((el, index) => ({
-                    id: parseInt(el.dataset.id),
-                    order: index
-                }));
-
-                fetch("/api/notes/order", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(newOrder)
-                });
-            }
-        });
-
-  </script>
+  <script src="/static/index.js"></script>
 </body>
 </html>

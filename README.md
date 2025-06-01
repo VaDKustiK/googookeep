@@ -8,17 +8,18 @@ literally a "Google Keep" clone but worse :)
 
 ### Current Features
 - **Drag your notes**: Move notes as you wish by dragging them. Create your own convenient order.
-- **Sharing notes via links**: Easily share your notes with others by generating shareable links.
+- **Sharing notes via codes**: Easily share your notes with others using sharing codes.
 
 ### Planned Features
 - **Sync between devices**: Keep your notes in sync across all your devices using Google Account authorization.
 - **Themes**: Customize the look and feel of the app with different themes.
 - **Enhanced text editor**: Add better text editing features for a richer note-taking experience.
 
-## Tech Stack
-- **Frontend**: Html, CSS, JavaScript, Bootstrap5 (will be React.js soon)
+## Stack
+- **Frontend**: Html, CSS, JavaScript, Bootstrap5
 - **Backend**: Golang
 - **Database**: PostgreSQL
+### Potentially
 - **Authentication**: Google OAuth 2.0
 
 ## Getting Started
