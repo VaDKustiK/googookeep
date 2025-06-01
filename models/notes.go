@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"googookeep/utils"
 	"log"
 )
 
@@ -23,12 +24,15 @@ func CreateNote(db *sql.DB, title, content string) (int, error) {
 		return 0, err
 	}
 
+	// Generate the share code once here
+	shareCode := utils.GenerateShareCode(8)
+
 	query := `
-		INSERT INTO notes (title, content, position)
-		VALUES ($1, $2, $3)
+		INSERT INTO notes (title, content, position, share_code)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id
 	`
-	err = db.QueryRow(query, title, content, maxPosition+1).Scan(&id)
+	err = db.QueryRow(query, title, content, maxPosition+1, shareCode).Scan(&id)
 	if err != nil {
 		log.Println("Error inserting note:", err)
 		return 0, err

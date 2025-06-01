@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"googookeep/db"
 	"googookeep/models"
-	"googookeep/utils"
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -189,20 +189,30 @@ func main() {
 			return
 		}
 
-		shared, err := models.GetNoteByShareCode(db.DB, payload.Code)
+		// 1) Print out exactly what code string arrived (trim whitespace just in case):
+		code := strings.TrimSpace(payload.Code)
+		fmt.Println("→ Import request received, code =", code)
+
+		// 2) Attempt lookup and log any SQL error:
+		shared, err := models.GetNoteByShareCode(db.DB, code)
 		if err == sql.ErrNoRows {
+			fmt.Println("→ No row found for share_code =", code)
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		} else if err != nil {
+			fmt.Println("→ SQL error while looking up share_code:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "lookup failed"})
 			return
 		}
 
+		// 3) If found, duplicate it:
 		newID, err := models.CreateNote(db.DB, shared.Title, shared.Content)
 		if err != nil {
+			fmt.Println("→ Error duplicating shared note:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not import"})
 			return
 		}
+		fmt.Println("→ Import succeeded; new note ID =", newID)
 		c.JSON(http.StatusOK, gin.H{"id": newID})
 	})
 
@@ -216,14 +226,12 @@ func main() {
 		}
 
 		if note.ShareCode == "" {
-			code := utils.GenerateShareCode(8)
-			if _, err := db.DB.Exec("UPDATE notes SET share_code=$1 WHERE id=$2", code, id); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save code"})
-				return
-			}
-			note.ShareCode = code
+			// Defensive fallback (should never happen)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "share code not available"})
+			return
 		}
 
+		fmt.Println("→ Returning share_code =", note.ShareCode)
 		c.JSON(http.StatusOK, gin.H{"code": note.ShareCode})
 	})
 

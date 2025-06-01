@@ -116,17 +116,31 @@
     }
 
     function shareNote(button) {
-      const noteId = button.getAttribute("data-note-id");
-      // generate random 8-digit code
-      const code = Math.floor(10000000 + Math.random() * 90000000).toString();
-      // copy to clipboard
-      navigator.clipboard.writeText(code)
-        .then(() => {
-          alert(`Share code for note ${noteId}: ${code}`);
-        })
-        .catch(() => {
-          alert("Failed to copy share code to clipboard.");
-        });
+    const noteId = button.getAttribute("data-note-id");
+
+    fetch(`/api/notes/share/${noteId}`, {
+      method: "POST",
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.code) {
+          navigator.clipboard.writeText(data.code)
+            .then(() => {
+              alert(`Share code for note ${noteId}: ${data.code}`);
+            })
+            .catch(() => {
+              alert(`Share code: ${data.code} (failed to copy)`);
+            });
+        } else if (data.error) {
+          alert("Error: " + data.error);
+        } else {
+          alert("Unexpected response from server.");
+        }
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("Failed to fetch share code.");
+      });
     }
   </script>
 </body>
